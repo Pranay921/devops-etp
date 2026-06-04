@@ -1,7 +1,7 @@
 pipeline{
     agent any
     environment{
-        DOCKER-IMAGE= "pranay921/myapp"
+        DOCKER_IMAGE= "pranay921/myapp"
     }
     stages{
         stage('build'){
