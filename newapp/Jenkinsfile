@@ -46,11 +46,11 @@ pipeline {
                     usernamePassword(
                         credentialsId: 'dockerhub-creds',
                         usernameVariable: 'DOCKER_USER',
-                        passwordVariable: 'DOCKER_TOKEN'
+                        passwordVariable: 'DOCKER_PASS'
                     )
                 ]) {
                     bat '''
-                    echo %DOCKER_TOKEN% | docker login -u %DOCKER_USER% --password-stdin
+                    echo %DOCKER_PASSS% | docker login -u %DOCKER_USER% --password-stdin
                     '''
                 }
             }
