@@ -26,7 +26,7 @@ pipeline {
         stage('Package') {
             steps {
                 dir('newapp') {
-                    bat 'mvn package'
+                    bat 'mvn package -DskipTests'
                 }
             }
         }
@@ -50,7 +50,7 @@ pipeline {
                     )
                 ]) {
                     bat '''
-                    echo %DOCKER_PASSS% | docker login -u %DOCKER_USER% --password-stdin
+                    echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
                     '''
                 }
             }
@@ -74,6 +74,7 @@ pipeline {
         }
 
         always {
+            junit '**/target/surefire-reports/*.xml'
             cleanWs()
         }
     }
