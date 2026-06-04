@@ -1,9 +1,12 @@
 pipeline {
     agent any
+
     environment {
-        DOCKER_IMAGE="pranay921/myapp"
+        DOCKER_IMAGE = "pranay921/myapp"
     }
+
     stages {
+
         stage('Build') {
             steps {
                 dir('newapp') {
@@ -11,6 +14,7 @@ pipeline {
                 }
             }
         }
+
         stage('Test') {
             steps {
                 dir('newapp') {
@@ -18,6 +22,7 @@ pipeline {
                 }
             }
         }
+
         stage('Package') {
             steps {
                 dir('newapp') {
@@ -25,6 +30,7 @@ pipeline {
                 }
             }
         }
+
         stage('Build Docker Image') {
             steps {
                 dir('newapp') {
@@ -33,6 +39,7 @@ pipeline {
                 }
             }
         }
+
         stage('Docker Login') {
             steps {
                 withCredentials([
@@ -43,11 +50,12 @@ pipeline {
                     )
                 ]) {
                     bat '''
-                    echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
+                    echo %DOCKER_TOKEN% | docker login -u %DOCKER_USER% --password-stdin
                     '''
                 }
             }
         }
+
         stage('Push Docker Image') {
             steps {
                 bat 'docker push %DOCKER_IMAGE%:%BUILD_NUMBER%'
@@ -55,6 +63,7 @@ pipeline {
             }
         }
     }
+
     post {
         success {
             echo 'Pipeline completed successfully!'
