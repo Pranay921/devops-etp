@@ -1,20 +1,27 @@
-pipeline{
+pipeline {
     agent any
-    environment{
-        DOCKER_IMAGE= "pranay921/myapp"
+    environment {
+        DOCKER_IMAGE="pranay921/myapp"
     }
-    stages{
-        stage('build'){
-            steps{
-                dir('newapp'){
-                    bat 'mvn compile'
+    stages {
+        stage('Build') {
+            steps {
+                dir('newapp') {
+                    bat 'mvn clean compile'
                 }
             }
         }
-        stage('test'){
-            steps{
-                dir('newapp'){
+        stage('Test') {
+            steps {
+                dir('newapp') {
                     bat 'mvn test'
+                }
+            }
+        }
+        stage('Package') {
+            steps {
+                dir('newapp') {
+                    bat 'mvn package'
                 }
             }
         }
@@ -22,20 +29,43 @@ pipeline{
             steps {
                 dir('newapp') {
                     bat 'docker build -t %DOCKER_IMAGE%:%BUILD_NUMBER% .'
+                    bat 'docker tag %DOCKER_IMAGE%:%BUILD_NUMBER% %DOCKER_IMAGE%:latest'
                 }
             }
         }
-
         stage('Docker Login') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-                    bat 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+                    bat '''
+                    echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
+                    '''
                 }
             }
+        }
+        stage('Push Docker Image') {
+            steps {
+                bat 'docker push %DOCKER_IMAGE%:%BUILD_NUMBER%'
+                bat 'docker push %DOCKER_IMAGE%:latest'
+            }
+        }
+    }
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+
+        failure {
+            echo 'Pipeline failed!'
+        }
+
+        always {
+            cleanWs()
         }
     }
 }
